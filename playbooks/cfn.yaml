@@ -1,0 +1,31 @@
+---
+- hosts: all
+  vars:
+    playbook_name: audit
+    stack_name: "log-audit"
+    prod_account_id: "123"
+  tasks:
+    - name: Assert that variables exist
+      assert:
+        that:
+          - prod_account_id != ""
+
+    - name: Delete previous
+      cloudformation:
+        stack_name: "{{ stack_name }}"
+        region: "eu-west-2"
+        state: "absent"
+
+    - name: Cloudformation Initialize Audit Log Buckets
+      cloudformation:
+        stack_name: "{{ stack_name }}"
+        state: "present"
+        region: "eu-west-2"
+        template: "templates/audit.yaml"
+        template_parameters:
+          Email: "something@abc.com"
+          S3Bucket: "something@abc.com"
+          PipelineName: "Ouroboros"
+        tags:
+          Stage: "prod"
+
